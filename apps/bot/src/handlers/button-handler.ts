@@ -4,7 +4,6 @@ import {
   ChannelType,
   PermissionFlagsBits,
   EmbedBuilder,
-  MessageFlags,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -79,13 +78,13 @@ async function handleListingOffer(interaction: ButtonInteraction, listingId: str
 async function handleListingEdit(interaction: ButtonInteraction, listingId: string) {
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
   if (!listing) {
-    return interaction.reply({ content: "❌ Listing not found.", flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: "❌ Listing not found.", ephemeral: true });
   }
 
   // Verify ownership
   const user = await prisma.user.findUnique({ where: { discordId: interaction.user.id } });
   if (!user || listing.ownerId !== user.id) {
-    return interaction.reply({ content: "❌ You can only edit your own listings.", flags: MessageFlags.Ephemeral });
+    return interaction.reply({ content: "❌ You can only edit your own listings.", ephemeral: true });
   }
 
   // Show modal with current values
@@ -132,7 +131,7 @@ async function handleListingEdit(interaction: ButtonInteraction, listingId: stri
 }
 
 async function handleListingDelete(interaction: ButtonInteraction, listingId: string) {
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ ephemeral: true });
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
@@ -168,7 +167,7 @@ async function handleListingDelete(interaction: ButtonInteraction, listingId: st
 }
 
 async function handleListingDetail(interaction: ButtonInteraction, listingId: string) {
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ ephemeral: true });
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
@@ -204,7 +203,7 @@ async function handleListingDetail(interaction: ButtonInteraction, listingId: st
 
   if (listing.offers.length > 0) {
     const offerList = listing.offers
-      .map((o) => `• Rp ${o.offerPrice.toLocaleString("id-ID")} by ${o.offerer.username} (${o.status})`)
+      .map((o: any) => `• Rp ${o.offerPrice.toLocaleString("id-ID")} by ${o.offerer.username} (${o.status})`)
       .join("\n");
     embed.addFields({ name: `Offers (${listing.offers.length})`, value: offerList });
   }
@@ -218,7 +217,7 @@ async function handleAcceptOffer(
   interaction: ButtonInteraction,
   offerId: string
 ) {
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ ephemeral: true });
 
   try {
     // Get offer details
@@ -383,7 +382,7 @@ async function handleRejectOffer(
   interaction: ButtonInteraction,
   offerId: string
 ) {
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ ephemeral: true });
 
   try {
     const offer = await prisma.offer.findUnique({
@@ -422,7 +421,7 @@ async function handleCounterOffer(
   interaction: ButtonInteraction,
   offerId: string
 ) {
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply({ ephemeral: true });
 
   try {
     const offer = await prisma.offer.findUnique({

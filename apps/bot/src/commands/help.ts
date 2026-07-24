@@ -2,7 +2,6 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   EmbedBuilder,
-  MessageFlags,
 } from "discord.js";
 
 export const helpCommand = {
@@ -36,6 +35,6 @@ export const helpCommand = {
       })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   },
 };

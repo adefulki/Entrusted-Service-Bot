@@ -2,7 +2,6 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   ChannelType,
-  MessageFlags,
   PermissionFlagsBits,
 } from "discord.js";
 import { prisma } from "@entrusted/database";
@@ -28,7 +27,7 @@ export const subscribeCommand = {
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply({ ephemeral: true });
 
     const guild = interaction.guild;
     if (!guild) {
