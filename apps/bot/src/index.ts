@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Client, GatewayIntentBits, Collection, REST, Routes } from "discord.js";
+import { Client, Events, GatewayIntentBits, Collection, REST, Routes } from "discord.js";
 import { startApiServer } from "./api/server.js";
 import { registerCommands, commands } from "./commands/index.js";
 import { handleInteraction } from "./handlers/interaction.js";
@@ -18,7 +18,7 @@ const client = new Client({
 // Register commands collection
 client.commands = new Collection();
 
-client.once("ready", async () => {
+client.once(Events.ClientReady, async () => {
   console.log(`[Bot] Logged in as ${client.user?.tag}`);
   registerCommands(client);
 
