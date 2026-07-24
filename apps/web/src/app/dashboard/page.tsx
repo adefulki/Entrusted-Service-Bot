@@ -33,7 +33,15 @@ export default function DashboardPage() {
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Please sign in to view the dashboard.</p>
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">Please sign in to view the dashboard.</p>
+          <a
+            href="/auth/signin"
+            className="inline-block px-6 py-3 bg-[#5865F2] text-white rounded-lg font-medium hover:opacity-90 transition"
+          >
+            Sign in with Discord
+          </a>
+        </div>
       </div>
     );
   }

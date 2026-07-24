@@ -1,8 +1,9 @@
 import { Client } from "discord.js";
+import { helpCommand } from "./help.js";
 import { katalogCommand } from "./katalog.js";
 import { subscribeCommand } from "./subscribe.js";
 
-const commands = [katalogCommand, subscribeCommand];
+const commands = [helpCommand, katalogCommand, subscribeCommand];
 
 export function registerCommands(client: Client) {
   for (const command of commands) {
