@@ -84,7 +84,11 @@ async function handleAcceptOffer(
       return interaction.editReply({ content: "Guild not found." });
     }
 
-    const categoryId = process.env.DISCORD_TICKET_CATEGORY_ID;
+    // Get ticket category from database
+    const guildConfig = await prisma.guild.findUnique({
+      where: { guildId: guild.id },
+    });
+    const categoryId = guildConfig?.ticketCategoryId || process.env.DISCORD_TICKET_CATEGORY_ID;
     const ticketChannel = await guild.channels.create({
       name: `ticket-${offer.listing.itemName.slice(0, 20).replace(/\s+/g, "-").toLowerCase()}`,
       type: ChannelType.GuildText,

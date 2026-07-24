@@ -7,6 +7,7 @@ import {
   ButtonStyle,
   TextChannel,
 } from "discord.js";
+import { prisma } from "@entrusted/database";
 
 interface OfferPayload {
   offerId: string;
@@ -19,6 +20,7 @@ interface OfferPayload {
   ownerDiscordId: string;
   ownerUsername: string;
   offererUsername: string;
+  guildId?: string;
 }
 
 export async function handleOfferNotification(
@@ -38,11 +40,36 @@ export async function handleOfferNotification(
       offerMessage,
       ownerDiscordId,
       offererUsername,
+      guildId,
     } = payload;
 
-    const channelId = process.env.DISCORD_NOTIFICATION_CHANNEL_ID;
+    // Look up notification channel from database
+    let channelId: string | null | undefined = null;
+
+    if (guildId) {
+      const guildConfig = await prisma.guild.findUnique({
+        where: { guildId },
+      });
+      channelId = guildConfig?.notificationChannelId;
+    }
+
+    // Fallback: find the first guild with a notification channel configured
     if (!channelId) {
-      return res.status(500).json({ error: "Notification channel not configured" });
+      const guildConfig = await prisma.guild.findFirst({
+        where: { notificationChannelId: { not: null }, active: true },
+      });
+      channelId = guildConfig?.notificationChannelId;
+    }
+
+    // Last resort: env var fallback
+    if (!channelId) {
+      channelId = process.env.DISCORD_NOTIFICATION_CHANNEL_ID;
+    }
+
+    if (!channelId) {
+      return res.status(500).json({
+        error: "Notification channel not configured. Use /subscribe in your server.",
+      });
     }
 
     const channel = await client.channels.fetch(channelId);

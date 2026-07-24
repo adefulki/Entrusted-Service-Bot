@@ -42,6 +42,19 @@ enum TransactionStatus {
 
 // ─── MODELS ───────────────────────────────────────────────────────────────────
 
+model Guild {
+  id                    String   @id @default(cuid())
+  guildId               String   @unique
+  name                  String
+  notificationChannelId String?
+  ticketCategoryId      String?
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("guilds")
+}
+
 model User {
   id        String   @id @default(cuid())
   discordId String   @unique
