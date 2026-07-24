@@ -36,9 +36,10 @@ ENV NODE_ENV=production
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/database ./packages/database
 COPY --from=builder /app/apps/web ./apps/web
+COPY packages/database/prisma ./packages/database/prisma
 COPY package.json ./
 
 WORKDIR /app/apps/web
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "npx next start -p ${PORT:-3000}"]
+CMD ["sh", "-c", "npx prisma db push --schema=/app/packages/database/prisma/schema.prisma --skip-generate && npx next start -p ${PORT:-3000}"]
