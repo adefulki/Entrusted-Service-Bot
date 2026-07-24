@@ -8,12 +8,14 @@ COPY apps/bot/package.json ./apps/bot/
 COPY packages/database/package.json ./packages/database/
 RUN npm install --workspace=apps/bot --workspace=packages/database
 
-# Generate Prisma Client
+# Generate Prisma Client and build database package
 FROM base AS prisma
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY packages/database ./packages/database
 RUN npx prisma generate --schema=packages/database/prisma/schema.prisma
+WORKDIR /app/packages/database
+RUN npx tsc
 
 # Build the app
 FROM base AS builder
