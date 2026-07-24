@@ -20,7 +20,7 @@ export async function handleModalSubmit(
 
   switch (action) {
     case "modal_offer":
-      await handleOfferSubmit(interaction, id);
+      await handleOfferSubmit(interaction, id, client);
       break;
     case "modal_edit":
       await handleEditSubmit(interaction, id);
@@ -28,7 +28,7 @@ export async function handleModalSubmit(
   }
 }
 
-async function handleOfferSubmit(interaction: ModalSubmitInteraction, listingId: string) {
+async function handleOfferSubmit(interaction: ModalSubmitInteraction, listingId: string, client: Client) {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const priceStr = interaction.fields.getTextInputValue("offer_price");
