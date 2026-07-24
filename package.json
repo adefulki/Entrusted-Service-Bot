@@ -1,0 +1,21 @@
+{
+  "name": "entrusted-service",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:bot": "npm run dev --workspace=apps/bot",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:bot": "npm run build --workspace=apps/bot",
+    "db:generate": "npx prisma generate --schema=packages/database/prisma/schema.prisma",
+    "db:push": "npx prisma db push --schema=packages/database/prisma/schema.prisma",
+    "db:migrate": "npx prisma migrate dev --schema=packages/database/prisma/schema.prisma",
+    "db:studio": "npx prisma studio --schema=packages/database/prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

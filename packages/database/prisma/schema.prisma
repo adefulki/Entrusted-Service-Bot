@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ListingType {
+  WTS // Want to Sell
+  WTB // Want to Buy
+}
+
+enum ListingStatus {
+  OPEN
+  IN_TRANSACTION
+  CLOSED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTERED
+}
+
+enum TransactionStatus {
+  PENDING_PAYMENT
+  PAID
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+// ─── MODELS ───────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  discordId String   @unique
+  username  String
+  avatar    String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  listings        Listing[]     @relation("UserListings")
+  offers          Offer[]       @relation("UserOffers")
+  buyTransactions Transaction[] @relation("BuyerTransactions")
+  sellTransactions Transaction[] @relation("SellerTransactions")
+
+  @@map("users")
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  ownerId      String
+  type         ListingType
+  itemName     String
+  initialPrice Float
+  description  String?
+  imageUrl     String?
+  status       ListingStatus @default(OPEN)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  owner        User          @relation("UserListings", fields: [ownerId], references: [id])
+  offers       Offer[]
+  transactions Transaction[]
+
+  @@map("listings")
+}
+
+model Offer {
+  id          String      @id @default(cuid())
+  listingId   String
+  offererId   String
+  offerPrice  Float
+  message     String?
+  status      OfferStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  listing     Listing      @relation(fields: [listingId], references: [id])
+  offerer     User         @relation("UserOffers", fields: [offererId], references: [id])
+  transaction Transaction?
+
+  @@map("offers")
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  listingId       String
+  offerId         String            @unique
+  buyerId         String
+  sellerId        String
+  totalAmount     Float
+  status          TransactionStatus @default(PENDING_PAYMENT)
+  ticketChannelId String?
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  listing Listing @relation(fields: [listingId], references: [id])
+  offer   Offer   @relation(fields: [offerId], references: [id])
+  buyer   User    @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller  User    @relation("SellerTransactions", fields: [sellerId], references: [id])
+
+  @@map("transactions")
+}
