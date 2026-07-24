@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 interface Listing {
@@ -18,7 +17,6 @@ interface Listing {
 }
 
 export default function MarketplacePage() {
-  const { data: session } = useSession();
   const [listings, setListings] = useState<Listing[]>([]);
   const [filter, setFilter] = useState<"ALL" | "WTS" | "WTB">("ALL");
   const [search, setSearch] = useState("");
@@ -54,30 +52,6 @@ export default function MarketplacePage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Marketplace</h1>
-          <div className="flex gap-3">
-            {session && (
-              <>
-                <Link
-                  href="/marketplace/my-listings"
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:opacity-90"
-                >
-                  My Listings
-                </Link>
-                <Link
-                  href="/marketplace/my-offers"
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:opacity-90"
-                >
-                  My Offers
-                </Link>
-                <Link
-                  href="/marketplace/create"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90"
-                >
-                  + New Listing
-                </Link>
-              </>
-            )}
-          </div>
         </div>
 
         {/* Filter Tabs */}
