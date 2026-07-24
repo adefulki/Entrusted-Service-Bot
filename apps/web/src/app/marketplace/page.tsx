@@ -21,6 +21,9 @@ export default function MarketplacePage() {
   const { data: session } = useSession();
   const [listings, setListings] = useState<Listing[]>([]);
   const [filter, setFilter] = useState<"ALL" | "WTS" | "WTB">("ALL");
+  const [search, setSearch] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,11 +32,21 @@ export default function MarketplacePage() {
 
   async function fetchListings() {
     setLoading(true);
-    const params = filter !== "ALL" ? `?type=${filter}` : "";
-    const res = await fetch(`/api/listings${params}`);
+    const params = new URLSearchParams();
+    if (filter !== "ALL") params.set("type", filter);
+    if (search) params.set("search", search);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    const res = await fetch(`/api/listings${query}`);
     const data = await res.json();
     setListings(data.listings || []);
     setLoading(false);
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    fetchListings();
   }
 
   return (
@@ -83,6 +96,37 @@ export default function MarketplacePage() {
             </button>
           ))}
         </div>
+
+        {/* Search & Price Filters */}
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-3 mb-6">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search items..."
+            className="flex-1 min-w-[200px] px-4 py-2 bg-input border rounded-lg"
+          />
+          <input
+            type="number"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="Min price"
+            className="w-32 px-3 py-2 bg-input border rounded-lg"
+          />
+          <input
+            type="number"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="Max price"
+            className="w-32 px-3 py-2 bg-input border rounded-lg"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90"
+          >
+            Search
+          </button>
+        </form>
 
         {/* Listings Grid */}
         {loading ? (

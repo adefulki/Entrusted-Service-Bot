@@ -10,6 +10,9 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get("type"); // WTS or WTB
     const status = searchParams.get("status") || "OPEN";
     const mine = searchParams.get("mine");
+    const search = searchParams.get("search");
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
 
     const where: any = {
       ...(type && { type: type as any }),
@@ -23,6 +26,18 @@ export async function GET(req: NextRequest) {
       }
       where.ownerId = session.user.id;
       delete where.status; // show all statuses for own listings
+    }
+
+    // Search by item name
+    if (search) {
+      where.itemName = { contains: search, mode: "insensitive" };
+    }
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+      where.initialPrice = {};
+      if (minPrice) where.initialPrice.gte = parseFloat(minPrice);
+      if (maxPrice) where.initialPrice.lte = parseFloat(maxPrice);
     }
 
     const listings = await prisma.listing.findMany({

@@ -23,16 +23,45 @@ export const katalogCommand = {
           { name: "Want to Sell", value: "WTS" },
           { name: "Want to Buy", value: "WTB" }
         )
+    )
+    .addStringOption((option) =>
+      option
+        .setName("search")
+        .setDescription("Search by item name")
+        .setRequired(false)
+    )
+    .addNumberOption((option) =>
+      option
+        .setName("min_price")
+        .setDescription("Minimum price (Rp)")
+        .setRequired(false)
+    )
+    .addNumberOption((option) =>
+      option
+        .setName("max_price")
+        .setDescription("Maximum price (Rp)")
+        .setRequired(false)
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply();
 
     const type = interaction.options.getString("type") || "ALL";
+    const search = interaction.options.getString("search");
+    const minPrice = interaction.options.getNumber("min_price");
+    const maxPrice = interaction.options.getNumber("max_price");
 
     const where: any = { status: "OPEN" };
     if (type !== "ALL") {
       where.type = type;
+    }
+    if (search) {
+      where.itemName = { contains: search, mode: "insensitive" };
+    }
+    if (minPrice || maxPrice) {
+      where.initialPrice = {};
+      if (minPrice) where.initialPrice.gte = minPrice;
+      if (maxPrice) where.initialPrice.lte = maxPrice;
     }
 
     const listings = await prisma.listing.findMany({
