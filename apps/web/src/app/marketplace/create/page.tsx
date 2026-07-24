@@ -25,6 +25,7 @@ export default function CreateListingPage() {
     const body = {
       type: formData.get("type"),
       itemName: formData.get("itemName"),
+      quantity: formData.get("quantity"),
       initialPrice: formData.get("initialPrice"),
       description: formData.get("description"),
     };
@@ -68,7 +69,18 @@ export default function CreateListingPage() {
               name="itemName"
               type="text"
               required
-              placeholder="e.g., iPhone 15 Pro Max"
+              placeholder="e.g., Nocturne"
+              className="w-full px-4 py-2 bg-input border rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Quantity</label>
+            <input
+              name="quantity"
+              type="number"
+              min="1"
+              defaultValue="1"
               className="w-full px-4 py-2 bg-input border rounded-lg"
             />
           </div>

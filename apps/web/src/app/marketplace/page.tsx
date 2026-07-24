@@ -9,6 +9,7 @@ interface Listing {
   type: "WTS" | "WTB";
   itemName: string;
   initialPrice: number;
+  quantity: number;
   description: string | null;
   status: string;
   createdAt: string;
@@ -40,14 +41,30 @@ export default function MarketplacePage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Marketplace</h1>
-          {session && (
-            <Link
-              href="/marketplace/create"
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90"
-            >
-              + New Listing
-            </Link>
-          )}
+          <div className="flex gap-3">
+            {session && (
+              <>
+                <Link
+                  href="/marketplace/my-listings"
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:opacity-90"
+                >
+                  My Listings
+                </Link>
+                <Link
+                  href="/marketplace/my-offers"
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:opacity-90"
+                >
+                  My Offers
+                </Link>
+                <Link
+                  href="/marketplace/create"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90"
+                >
+                  + New Listing
+                </Link>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Filter Tabs */}
@@ -97,6 +114,9 @@ export default function MarketplacePage() {
                 <h3 className="text-lg font-semibold mb-1">{listing.itemName}</h3>
                 <p className="text-2xl font-bold text-primary">
                   Rp {listing.initialPrice.toLocaleString("id-ID")}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Qty: {listing.quantity}
                 </p>
                 {listing.description && (
                   <p className="text-sm text-muted-foreground mt-2 line-clamp-2">

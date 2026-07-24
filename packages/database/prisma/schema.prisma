@@ -79,6 +79,7 @@ model Listing {
   ownerId      String
   type         ListingType
   itemName     String
+  quantity     Int           @default(1)
   initialPrice Float
   description  String?
   imageUrl     String?

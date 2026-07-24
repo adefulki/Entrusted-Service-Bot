@@ -9,6 +9,7 @@ interface Listing {
   type: "WTS" | "WTB";
   itemName: string;
   initialPrice: number;
+  quantity: number;
   description: string | null;
   status: string;
   createdAt: string;
@@ -124,8 +125,11 @@ export default function ListingDetailPage() {
           </div>
 
           <h1 className="text-3xl font-bold mb-2">{listing.itemName}</h1>
-          <p className="text-3xl font-bold text-primary mb-4">
+          <p className="text-3xl font-bold text-primary mb-2">
             Rp {listing.initialPrice.toLocaleString("id-ID")}
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Quantity: {listing.quantity}
           </p>
           {listing.description && (
             <p className="text-muted-foreground">{listing.description}</p>
