@@ -4,8 +4,9 @@ import { katalogCommand } from "./katalog.js";
 import { subscribeCommand } from "./subscribe.js";
 import { itemCommand } from "./item.js";
 import { offerCommand } from "./offer.js";
+import { webCommand } from "./web.js";
 
-const commands = [helpCommand, katalogCommand, subscribeCommand, itemCommand, offerCommand];
+const commands = [helpCommand, katalogCommand, subscribeCommand, itemCommand, offerCommand, webCommand];
 
 export function registerCommands(client: Client) {
   for (const command of commands) {

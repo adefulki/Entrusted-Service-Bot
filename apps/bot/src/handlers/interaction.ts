@@ -5,6 +5,7 @@ import {
   ButtonInteraction,
 } from "discord.js";
 import { handleButtonInteraction } from "./button-handler.js";
+import { handleModalSubmit } from "./modal-handler.js";
 
 export async function handleInteraction(
   interaction: Interaction,
@@ -18,6 +19,11 @@ export async function handleInteraction(
   // Button interactions
   if (interaction.isButton()) {
     await handleButtonInteraction(interaction, client);
+  }
+
+  // Modal submissions
+  if (interaction.isModalSubmit()) {
+    await handleModalSubmit(interaction, client);
   }
 }
 

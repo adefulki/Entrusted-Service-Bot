@@ -4,6 +4,11 @@ import {
   ChannelType,
   PermissionFlagsBits,
   EmbedBuilder,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
+  ModalActionRowComponentBuilder,
 } from "discord.js";
 import { prisma } from "@entrusted/database";
 
@@ -11,21 +16,201 @@ export async function handleButtonInteraction(
   interaction: ButtonInteraction,
   client: Client
 ) {
-  const [action, offerId] = interaction.customId.split(":");
+  const [action, id] = interaction.customId.split(":");
 
-  if (!offerId) return;
+  if (!id) return;
 
   switch (action) {
     case "offer_accept":
-      await handleAcceptOffer(interaction, offerId);
+      await handleAcceptOffer(interaction, id);
       break;
     case "offer_reject":
-      await handleRejectOffer(interaction, offerId);
+      await handleRejectOffer(interaction, id);
       break;
     case "offer_counter":
-      await handleCounterOffer(interaction, offerId);
+      await handleCounterOffer(interaction, id);
+      break;
+    case "listing_offer":
+      await handleListingOffer(interaction, id);
+      break;
+    case "listing_edit":
+      await handleListingEdit(interaction, id);
+      break;
+    case "listing_delete":
+      await handleListingDelete(interaction, id);
+      break;
+    case "listing_detail":
+      await handleListingDetail(interaction, id);
       break;
   }
+}
+
+// ─── Listing Button Handlers ──────────────────────────────────────────────────
+
+async function handleListingOffer(interaction: ButtonInteraction, listingId: string) {
+  // Show a modal for the user to enter their offer
+  const modal = new ModalBuilder()
+    .setCustomId(`modal_offer:${listingId}`)
+    .setTitle("Make an Offer");
+
+  const priceInput = new TextInputBuilder()
+    .setCustomId("offer_price")
+    .setLabel("Your offer price (Rp)")
+    .setStyle(TextInputStyle.Short)
+    .setPlaceholder("e.g., 450000")
+    .setRequired(true);
+
+  const messageInput = new TextInputBuilder()
+    .setCustomId("offer_message")
+    .setLabel("Message (optional)")
+    .setStyle(TextInputStyle.Paragraph)
+    .setPlaceholder("Any message for the seller...")
+    .setRequired(false);
+
+  modal.addComponents(
+    new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(priceInput),
+    new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(messageInput)
+  );
+
+  await interaction.showModal(modal);
+}
+
+async function handleListingEdit(interaction: ButtonInteraction, listingId: string) {
+  const listing = await prisma.listing.findUnique({ where: { id: listingId } });
+  if (!listing) {
+    return interaction.reply({ content: "❌ Listing not found.", ephemeral: true });
+  }
+
+  // Verify ownership
+  const user = await prisma.user.findUnique({ where: { discordId: interaction.user.id } });
+  if (!user || listing.ownerId !== user.id) {
+    return interaction.reply({ content: "❌ You can only edit your own listings.", ephemeral: true });
+  }
+
+  // Show modal with current values
+  const modal = new ModalBuilder()
+    .setCustomId(`modal_edit:${listingId}`)
+    .setTitle("Edit Listing");
+
+  const nameInput = new TextInputBuilder()
+    .setCustomId("edit_name")
+    .setLabel("Item Name")
+    .setStyle(TextInputStyle.Short)
+    .setValue(listing.itemName)
+    .setRequired(true);
+
+  const priceInput = new TextInputBuilder()
+    .setCustomId("edit_price")
+    .setLabel("Price (Rp)")
+    .setStyle(TextInputStyle.Short)
+    .setValue(listing.initialPrice.toString())
+    .setRequired(true);
+
+  const quantityInput = new TextInputBuilder()
+    .setCustomId("edit_quantity")
+    .setLabel("Quantity")
+    .setStyle(TextInputStyle.Short)
+    .setValue(listing.quantity.toString())
+    .setRequired(true);
+
+  const descInput = new TextInputBuilder()
+    .setCustomId("edit_description")
+    .setLabel("Description")
+    .setStyle(TextInputStyle.Paragraph)
+    .setValue(listing.description || "")
+    .setRequired(false);
+
+  modal.addComponents(
+    new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(nameInput),
+    new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(priceInput),
+    new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(quantityInput),
+    new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(descInput)
+  );
+
+  await interaction.showModal(modal);
+}
+
+async function handleListingDelete(interaction: ButtonInteraction, listingId: string) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    include: { _count: { select: { transactions: true } } },
+  });
+
+  if (!listing) {
+    return interaction.editReply("❌ Listing not found.");
+  }
+
+  const user = await prisma.user.findUnique({ where: { discordId: interaction.user.id } });
+  if (!user || listing.ownerId !== user.id) {
+    return interaction.editReply("❌ You can only delete your own listings.");
+  }
+
+  if (listing._count.transactions > 0) {
+    return interaction.editReply("❌ Cannot delete a listing with active transactions.");
+  }
+
+  await prisma.offer.deleteMany({ where: { listingId } });
+  await prisma.listing.delete({ where: { id: listingId } });
+
+  await interaction.editReply(`🗑️ **${listing.itemName}** has been deleted.`);
+
+  // Remove the original message buttons
+  try {
+    await interaction.message.edit({
+      components: [],
+      content: `~~${interaction.message.embeds[0]?.title || "Listing"}~~ — **DELETED**`,
+      embeds: [],
+    });
+  } catch {}
+}
+
+async function handleListingDetail(interaction: ButtonInteraction, listingId: string) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    include: {
+      owner: { select: { username: true } },
+      offers: {
+        include: { offerer: { select: { username: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      },
+    },
+  });
+
+  if (!listing) {
+    return interaction.editReply("❌ Listing not found.");
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle(`📋 ${listing.itemName}`)
+    .setColor(listing.type === "WTS" ? 0x00ff88 : 0x0088ff)
+    .addFields(
+      { name: "Type", value: listing.type, inline: true },
+      { name: "Price", value: `Rp ${listing.initialPrice.toLocaleString("id-ID")}`, inline: true },
+      { name: "Quantity", value: listing.quantity.toString(), inline: true },
+      { name: "Status", value: listing.status, inline: true },
+      { name: "Seller", value: listing.owner.username, inline: true },
+      { name: "Created", value: listing.createdAt.toLocaleDateString("id-ID"), inline: true }
+    );
+
+  if (listing.description) {
+    embed.setDescription(listing.description);
+  }
+
+  if (listing.offers.length > 0) {
+    const offerList = listing.offers
+      .map((o) => `• Rp ${o.offerPrice.toLocaleString("id-ID")} by ${o.offerer.username} (${o.status})`)
+      .join("\n");
+    embed.addFields({ name: `Offers (${listing.offers.length})`, value: offerList });
+  }
+
+  embed.setFooter({ text: `ID: ${listing.id}` });
+
+  await interaction.editReply({ embeds: [embed] });
 }
 
 async function handleAcceptOffer(
