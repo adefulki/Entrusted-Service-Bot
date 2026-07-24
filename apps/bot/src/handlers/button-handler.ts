@@ -4,6 +4,7 @@ import {
   ChannelType,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -78,13 +79,13 @@ async function handleListingOffer(interaction: ButtonInteraction, listingId: str
 async function handleListingEdit(interaction: ButtonInteraction, listingId: string) {
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
   if (!listing) {
-    return interaction.reply({ content: "❌ Listing not found.", ephemeral: true });
+    return interaction.reply({ content: "❌ Listing not found.", flags: MessageFlags.Ephemeral });
   }
 
   // Verify ownership
   const user = await prisma.user.findUnique({ where: { discordId: interaction.user.id } });
   if (!user || listing.ownerId !== user.id) {
-    return interaction.reply({ content: "❌ You can only edit your own listings.", ephemeral: true });
+    return interaction.reply({ content: "❌ You can only edit your own listings.", flags: MessageFlags.Ephemeral });
   }
 
   // Show modal with current values
@@ -131,7 +132,7 @@ async function handleListingEdit(interaction: ButtonInteraction, listingId: stri
 }
 
 async function handleListingDelete(interaction: ButtonInteraction, listingId: string) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
@@ -167,7 +168,7 @@ async function handleListingDelete(interaction: ButtonInteraction, listingId: st
 }
 
 async function handleListingDetail(interaction: ButtonInteraction, listingId: string) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
@@ -217,7 +218,7 @@ async function handleAcceptOffer(
   interaction: ButtonInteraction,
   offerId: string
 ) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   try {
     // Get offer details
@@ -382,7 +383,7 @@ async function handleRejectOffer(
   interaction: ButtonInteraction,
   offerId: string
 ) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   try {
     const offer = await prisma.offer.findUnique({
@@ -421,7 +422,7 @@ async function handleCounterOffer(
   interaction: ButtonInteraction,
   offerId: string
 ) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   try {
     const offer = await prisma.offer.findUnique({

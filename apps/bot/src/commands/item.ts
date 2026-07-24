@@ -2,6 +2,7 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   EmbedBuilder,
+  MessageFlags,
   PermissionFlagsBits,
 } from "discord.js";
 import { prisma } from "@entrusted/database";
@@ -140,7 +141,7 @@ async function getOrCreateUser(discordId: string, username: string) {
 }
 
 async function handleCreate(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const type = interaction.options.getString("type", true) as "WTS" | "WTB";
   const itemName = interaction.options.getString("name", true);
@@ -189,7 +190,7 @@ async function handleCreate(interaction: ChatInputCommandInteraction) {
 }
 
 async function handleList(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const user = await prisma.user.findUnique({
     where: { discordId: interaction.user.id },
@@ -231,7 +232,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
 }
 
 async function handleEdit(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const listingId = interaction.options.getString("id", true);
   const newName = interaction.options.getString("name");
@@ -297,7 +298,7 @@ async function handleEdit(interaction: ChatInputCommandInteraction) {
 }
 
 async function handleDelete(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const listingId = interaction.options.getString("id", true);
 

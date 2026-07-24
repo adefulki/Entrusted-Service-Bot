@@ -3,6 +3,7 @@ import {
   Client,
   ChatInputCommandInteraction,
   ButtonInteraction,
+  MessageFlags,
 } from "discord.js";
 import { handleButtonInteraction } from "./button-handler.js";
 import { handleModalSubmit } from "./modal-handler.js";
@@ -40,7 +41,7 @@ async function handleSlashCommand(
     console.error(`[Command] Error executing ${interaction.commandName}:`, error);
     const reply = {
       content: "There was an error executing this command.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     };
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp(reply);

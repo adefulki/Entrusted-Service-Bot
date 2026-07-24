@@ -5,6 +5,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  MessageFlags,
 } from "discord.js";
 
 const WEB_URL = process.env.NEXT_PUBLIC_APP_URL || "https://entrusted-service-web-production.up.railway.app";
@@ -40,6 +41,6 @@ export const webCommand = {
         .setURL(`${WEB_URL}/marketplace/my-offers`)
     );
 
-    await interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true });
+    await interaction.reply({ embeds: [embed], components: [buttons], flags: MessageFlags.Ephemeral });
   },
 };

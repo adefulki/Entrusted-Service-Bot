@@ -2,6 +2,7 @@ import {
   ModalSubmitInteraction,
   Client,
   EmbedBuilder,
+  MessageFlags,
   TextChannel,
   ActionRowBuilder,
   ButtonBuilder,
@@ -28,7 +29,7 @@ export async function handleModalSubmit(
 }
 
 async function handleOfferSubmit(interaction: ModalSubmitInteraction, listingId: string) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const priceStr = interaction.fields.getTextInputValue("offer_price");
   const message = interaction.fields.getTextInputValue("offer_message") || null;
@@ -140,7 +141,7 @@ async function handleOfferSubmit(interaction: ModalSubmitInteraction, listingId:
 }
 
 async function handleEditSubmit(interaction: ModalSubmitInteraction, listingId: string) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const newName = interaction.fields.getTextInputValue("edit_name");
   const priceStr = interaction.fields.getTextInputValue("edit_price");
