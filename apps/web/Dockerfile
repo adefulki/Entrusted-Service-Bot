@@ -33,23 +33,14 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/packages/database ./packages/database
+COPY --from=builder /app/apps/web ./apps/web
+COPY package.json ./
 
-# Copy entire standalone output
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-
-# List contents to debug structure during build
-RUN find /app -name "server.js" -type f
-
-# Copy static assets - try both possible locations
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./public
-
-USER nextjs
+WORKDIR /app/apps/web
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Use shell to find server.js dynamically
-CMD ["sh", "-c", "node $(find /app -name server.js -type f | head -1)"]
+CMD ["npx", "next", "start"]
